@@ -1,0 +1,61 @@
+version: '3.3'
+services:
+  zserver:
+    hostname: zserver
+    restart: unless-stopped
+    #volumes:
+      #- ./player/whitelist.txt:/home/zandronum/player/whitelist.txt:ro
+      #- ./player/banlist.txt:/home/zandronum/player/banlist.txt:rw
+      #- ./player/adminlist.txt:/home/zandronum/player/adminlist.txt:ro
+      #- ./config/default.cfg:/home/zandronum/config/default.cfg:ro
+      #- doom-logs:/home/zandronum/log/:rw
+    ports:
+      - 10667:10667/udp
+    networks:
+      zandro-net:
+        ipv4_address: 192.168.167.10
+    image: innovanon/zserver
+    container_name: zserver
+
+  zclient:
+    build: .
+    privileged: true
+    hostname: zclient
+    volumes:
+      #- ./config/default.cfg:/home/zandronum/config/default.cfg:ro
+      #- doom-logs:/home/zandronum/log/:rw
+      # TODO
+      #- /tmp/.X11-unix:/tmp/.X11-unix:ro 
+      #- /etc/localtime:/etc/localtime:ro
+      #- $XAUTHORITY:$XAUTHORITY
+      #- $HOME/.Xauthority:/home/zandronum/.Xauthority:rw
+      - $XAUTHORITY:/home/zandronum/.Xauthority:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro 
+      - /etc/localtime:/etc/localtime:ro
+    devices:
+      - "/dev/snd"
+    #networks:
+    #  - zandro-net
+    network_mode: "host"
+    environment:
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY
+    image: innovanon/zclient
+    container_name: zclient
+    depends_on:
+      - "zserver"
+
+volumes:
+  doom-logs:
+  #abaddonvol:
+  #  external: true
+  #wadsvol:
+  #  external: true
+  #clientcfg:
+
+networks:
+  zandro-net:
+    ipam:
+      config:
+      - subnet: 192.168.167.0/24
+
